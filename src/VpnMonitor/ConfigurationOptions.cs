@@ -2,9 +2,8 @@ namespace VpnMonitor
 {
     public class ConfigurationOptions
     {
-        private string _vpnName;
-        public string VpnName { get; set; } = "Vpn";
+        public string VpnName { get; set; }
         public bool ShowNotification { get; set; } = true;
-        public int PollingIntervalMs { get; set; } = 2;
+        public int PollingIntervalMs { get; set; } = 500;
     }
 }

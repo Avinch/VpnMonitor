@@ -9,6 +9,6 @@ Built with WinForms / .NET 5
 Update `appsettings.json` with the following:
 
 - `VpnName`: Name of the VPN that you wish to check the connection status of
-- `PollingIntervalMs`: How frequently the connection state should be checked in milliseconds
-- `ShowNotification`: Whether you wish to recieve a notification if the connection state has been changed
+- `PollingIntervalMs`: How frequently the connection state should be checked in milliseconds (default: `500`)
+- `ShowNotification`: Whether you wish to recieve a notification if the connection state has been changed (default: `true`)
 
