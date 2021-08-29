@@ -8,17 +8,12 @@ namespace VpnMonitor
 {
     public class TrayIconProvider
     {
-        private readonly VpnService _vpn;
         private readonly ConfigurationOptions _config;
         
-        private ConnectedState _currentState;
         private NotifyIcon _icon;
         
-        
-        public TrayIconProvider(VpnService vpn, ConfigurationOptions config)
+        public TrayIconProvider(ConfigurationOptions config)
         {
-            _currentState = ConnectedState.Unknown;
-            _vpn = vpn;
             _config = config;
         }
         
@@ -31,51 +26,45 @@ namespace VpnMonitor
             };
         }
 
-        public void CheckVpn()
+        public void SetIconConnectionState(bool connected, string vpnName = "Unknown")
         {
-            var oldState = _currentState;
-            var newState = ConnectedState.Unknown;
-
-            if (_vpn.Connected)
+            if (connected)
             {
-                newState = ConnectedState.Connected;
                 _icon.Icon = new Icon(SystemIcons.Shield, 40, 40);
-                _icon.Text = $"Connected to VPN: {_vpn.VpnNetworkInterface.Description}";
+                _icon.Text = $"Connected to VPN: {vpnName}";
             }
             else
-            {                
-                newState = ConnectedState.Disconnected;
+            {
                 _icon.Icon = new Icon(SystemIcons.Error, 40, 40);
                 _icon.Text = "Disconnected from the VPN";
             }
-
-            _currentState = newState;
-
-            if (_config.ShowNotification && oldState != newState)
-            {
-                SendNotification(oldState, newState);
-            }
         }
         
-        private void SendNotification(ConnectedState oldState, ConnectedState newState)
+        public void SendConnectionStateChangeNotification(bool connected, string vpnName = "Unknown")
         {
-            if (oldState == ConnectedState.Unknown || newState == ConnectedState.Unknown) return; 
-
-            var notificationText = newState switch
+            if (!_config.ShowConnectedNotification) return;
+            
+            var notificationText = connected switch
             {
-                ConnectedState.Connected => $"Connected to VPN: {_vpn.VpnNetworkInterface.Description}",
-                ConnectedState.Disconnected => "Disconnected from the VPN",
-                _ => throw new InvalidOperationException()
+                true => $"Connection established to VPN: {vpnName}",
+                false => "Disconnected from the VPN"
             };
             
-            var notificationTitle = newState switch
+            var notificationTitle = connected switch
             {
-                ConnectedState.Connected => $"VPN Connected",
-                ConnectedState.Disconnected => "VPN Disconnected",
-                _ => throw new InvalidOperationException()
+                true => "VPN Connected",
+                false => "VPN Disconnected",
             };
 
             _icon.ShowBalloonTip(50, notificationTitle, notificationText, ToolTipIcon.Info);
+        }
+        
+        public void SendConnectedReminderNotification()
+        {
+            if (!_config.ShowReminderNotification) return;
+            
+            _icon.ShowBalloonTip(50, "Reminder", 
+                $"You are still connected to the VPN", ToolTipIcon.Info);
         }
     }
 }

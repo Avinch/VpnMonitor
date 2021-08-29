@@ -8,12 +8,14 @@ namespace VpnMonitor
     public class Startup
     {
         private readonly TrayIconProvider _trayIconProvider;
+        private readonly VpnService _vpn;
         private readonly ConfigurationOptions _config;
         
-        public Startup(TrayIconProvider tray, ConfigurationOptions config)
+        public Startup(TrayIconProvider tray, ConfigurationOptions config, VpnService vpn)
         {
             _trayIconProvider = tray;
             _config = config;
+            _vpn = vpn;
         }
         
         public void Start()
@@ -37,7 +39,7 @@ namespace VpnMonitor
         {
             try
             {
-                _trayIconProvider.CheckVpn();
+                _vpn.CheckVpnStatus();
             }
             catch (Exception ex)
             {

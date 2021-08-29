@@ -8,13 +8,19 @@ namespace VpnMonitor
     {
         private bool _vpnLoaded;
         private readonly ConfigurationOptions _config;
+        private readonly ReminderService _reminder;
         public bool Connected => CheckConnection() && VpnNetworkInterface.OperationalStatus == OperationalStatus.Up;
 
-        public NetworkInterface VpnNetworkInterface { get; private set; }
+        private ConnectedState _currentState;
         
-        public VpnService(ConfigurationOptions config)
+        public NetworkInterface VpnNetworkInterface { get; private set; }
+        private TrayIconProvider _tray { get; set; }
+        
+        public VpnService(ConfigurationOptions config, TrayIconProvider tray, ReminderService reminder)
         {
             _config = config;
+            _reminder = reminder;
+            _tray = tray;
             CheckConnection();
         }
         
@@ -30,6 +36,36 @@ namespace VpnMonitor
             VpnNetworkInterface = obj;
 
             return _vpnLoaded;
+        }
+
+        public void CheckVpnStatus()
+        {
+            var oldState = _currentState;
+            var newState = Connected ? ConnectedState.Connected : ConnectedState.Disconnected;
+
+            _currentState = newState;
+            
+            if (oldState != newState)
+            {
+                _tray.SetIconConnectionState(Connected, VpnNetworkInterface?.Description);
+
+                if (_config.ShowConnectedNotification)
+                {
+                    _tray.SendConnectionStateChangeNotification(Connected, VpnNetworkInterface?.Description);
+                }
+
+                if (_config.ShowReminderNotification)
+                {
+                    if (newState == ConnectedState.Connected)
+                    {
+                        _reminder.Start();
+                    }
+                    else
+                    {
+                        _reminder.Stop();
+                    }
+                }
+            }
         }
     }
 }

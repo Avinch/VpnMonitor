@@ -34,6 +34,7 @@ namespace VpnMonitor
             services.AddSingleton(configOptions);
             services.AddSingleton<TrayIconProvider, TrayIconProvider>();
             services.AddSingleton<VpnService, VpnService>();
+            services.AddSingleton<ReminderService, ReminderService>();
         }
     }
 }
